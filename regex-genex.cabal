@@ -31,6 +31,9 @@ library
 
 executable genex
     main-is:            Main.hs
+    other-modules:      Regex.Genex
+                      , Regex.Genex.Normalize
+                      , Regex.Genex.Pure
     hs-source-dirs:     . src
     extensions      : ImplicitParams, NamedFieldPuns, ParallelListComp, PatternGuards, RecordWildCards
     build-depends:
