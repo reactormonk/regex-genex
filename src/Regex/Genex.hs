@@ -11,7 +11,7 @@ It requires the @z3@ or @yices@ binary in PATH. The latter may be downloaded fro
 
 -}
 module Regex.Genex (Model(..), genex, genexPure, genexPrint, genexModels, genexWith, regexMatch) where
-import Data.SBV
+import Data.SBV hiding (SChar)
 import Data.SBV.Internals (SBV)
 import Data.Set (toList)
 import Data.Monoid
