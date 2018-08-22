@@ -11,7 +11,7 @@ It requires the @z3@ or @yices@ binary in PATH. The latter may be downloaded fro
 
 -}
 module Regex.Genex (Model(..), genex, genexPure, genexPrint, genexModels, genexWith, regexMatch) where
-import Data.SBV
+import Data.SBV hiding (SChar)
 import Data.SBV.Internals (SBV)
 import Data.Set (toList)
 import Data.Monoid
@@ -203,7 +203,7 @@ writeCapture cap idx val = writeArray cap (toEnum idx) val
 
 readCapture :: Captures -> Int -> Offset
 readCapture a = readArray a . toEnum
-    
+
 isOne :: Pattern -> Bool
 isOne PChar{} = True
 isOne PDot{} = True
@@ -261,7 +261,7 @@ match :: (?maxRepeat :: Int, ?str :: Str, ?pat :: Pattern, ?grp :: GroupLens) =>
 match s@Status{ pos, flips, captureAt, captureLen }
   | isOne ?pat = ite (pos .>= strLen) __FAIL__ one
   | otherwise = ite (pos + (toEnum $ minLen ?pat) .> strLen) __FAIL__ $ case ?pat of
-    PGroup (Just idx) p -> let s'@Status{ pos = pos', ok = ok' } = next p in 
+    PGroup (Just idx) p -> let s'@Status{ pos = pos', ok = ok' } = next p in
         ite ok' (s'
             { captureAt = writeCapture captureAt idx pos
             , captureLen = writeCapture captureLen idx (pos' - pos)
@@ -286,15 +286,15 @@ match s@Status{ pos, flips, captureAt, captureLen }
         | otherwise -> step ps s
         where
         step [] s' = s'
-        step (p':ps') s' = 
+        step (p':ps') s' =
             let s''@Status{ ok } = (let ?pat = p' in match s')
                 res = step ps' s''
              in ite ok res __FAIL__
     PEscape {getPatternChar = ch} -> case ch of
         'b' -> ite isWordBoundary s __FAIL__
-        _ | Data.Char.isDigit ch -> 
+        _ | Data.Char.isDigit ch ->
             let from = readCapture captureAt num
-                Just defaultLen = IntMap.lookup num ?grp 
+                Just defaultLen = IntMap.lookup num ?grp
                 possibleLens = IntSet.toList defaultLen
                 len = case possibleLens of
                     []  -> 0
@@ -379,7 +379,7 @@ genexWith f regexes = do
     let lens = IntSet.toAscList $ foldl1 IntSet.intersection (map snd p'lens)
     tryWith f (filter (<= maxLength) $ map toEnum lens) 0
 
-tryWith :: (?maxRepeat :: Int, ?pats :: [(Pattern, GroupLens)]) => 
+tryWith :: (?maxRepeat :: Int, ?pats :: [(Pattern, GroupLens)]) =>
     Monoid a => ResultHandler a -> [Len] -> Hits -> IO a
 tryWith _ [] _ = return mempty
 tryWith f (len:lens) acc = if len > maxLength then return mempty else do
